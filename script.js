@@ -168,7 +168,7 @@ function calculatePH(volBase) {
 function getIndicatorColor(pH) {
     // Phenolphthalein: < 8.2 Colorless, > 10.0 Pink
     // We will simulate a gradient
-    if (pH < 8.2) return 'rgba(255, 255, 255, 0.4)'; // Clear/White
+    if (pH < 8.2) return 'rgba(230, 230, 230, 0.7)'; // Light Greyish for Acid
     if (pH >= 10.0) return 'rgba(255, 105, 180, 0.8)'; // Pink
 
     // Gradient logic between 8.2 and 10.0
