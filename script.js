@@ -32,7 +32,9 @@ let state = {
     baseConc: 0.1, // M
     volBaseAdded: 0, // mL
     isAutoTitrating: false,
-    intervalId: null
+    isStopcockOpen: false,
+    intervalId: null,
+    dropIntervalId: null
 };
 
 // Constants
@@ -254,6 +256,8 @@ function resetTitration() {
 }
 
 function toggleAutoTitrate() {
+    if (state.isStopcockOpen) toggleStopcock(); // Close manual if open
+
     if (state.isAutoTitrating) {
         clearInterval(state.intervalId);
         state.isAutoTitrating = false;
@@ -263,9 +267,7 @@ function toggleAutoTitrate() {
         btnAuto.textContent = "Parar";
         state.intervalId = setInterval(() => {
             if (state.volBaseAdded >= titrationChart.options.scales.x.max) {
-                clearInterval(state.intervalId);
-                state.isAutoTitrating = false;
-                btnAuto.textContent = "Titular Auto";
+                toggleAutoTitrate(); // Stop
                 return;
             }
             addTitrant(0.5); // 0.5 mL steps
@@ -273,12 +275,38 @@ function toggleAutoTitrate() {
     }
 }
 
+function toggleStopcock() {
+    if (state.isAutoTitrating) toggleAutoTitrate(); // Stop auto if active
+
+    if (state.isStopcockOpen) {
+        // Close
+        state.isStopcockOpen = false;
+        stopcockBtn.classList.remove('open');
+        clearInterval(state.dropIntervalId);
+        drop.classList.remove('animate-drop');
+    } else {
+        // Open
+        state.isStopcockOpen = true;
+        stopcockBtn.classList.add('open');
+        state.dropIntervalId = setInterval(() => {
+            if (state.volBaseAdded >= titrationChart.options.scales.x.max) {
+                toggleStopcock(); // Stop
+                return;
+            }
+            addTitrant(0.1); // Continuous flow
+        }, 200);
+    }
+}
+
 // Event Listeners
 btnAdd01.addEventListener('click', () => addTitrant(0.1));
 btnAdd1.addEventListener('click', () => addTitrant(1.0));
-btnReset.addEventListener('click', resetTitration);
+btnReset.addEventListener('click', () => {
+    if (state.isStopcockOpen) toggleStopcock();
+    resetTitration();
+});
 btnAuto.addEventListener('click', toggleAutoTitrate);
-stopcockBtn.addEventListener('click', () => addTitrant(0.1));
+stopcockBtn.addEventListener('click', toggleStopcock);
 
 // Init
 resetTitration();

@@ -129,6 +129,11 @@ h1 {
     transform: translateX(-50%) scale(0.95) rotate(90deg);
 }
 
+.stopcock-btn.open {
+    transform: rotate(90deg);
+    background: #555;
+}
+
 .stopcock-btn::after {
     content: '';
     width: 60%;
