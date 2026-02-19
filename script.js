@@ -2,6 +2,9 @@
 const canvas = document.getElementById('titrationChart');
 const ctx = canvas.getContext('2d');
 const beakerLiquid = document.getElementById('beaker-liquid');
+const buretteLiquid = document.getElementById('burette-liquid');
+const stopcockBtn = document.getElementById('btn-stopcock');
+const drop = document.getElementById('liquid-drop');
 const indicatorName = document.getElementById('indicator-name');
 const currentPhDisplay = document.getElementById('current-ph');
 const volAddedDisplay = document.getElementById('vol-added');
@@ -180,7 +183,14 @@ function getIndicatorColor(pH) {
 // Simulation Steps
 function addTitrant(amount) {
     state.volBaseAdded += amount;
+    triggerDrop();
     updateSimulation();
+}
+
+function triggerDrop() {
+    drop.classList.remove('animate-drop');
+    void drop.offsetWidth; // Trigger reflow
+    drop.classList.add('animate-drop');
 }
 
 function updateSimulation() {
@@ -207,6 +217,13 @@ function updateSimulation() {
 
     beakerLiquid.style.height = `${newHeight}%`;
     beakerLiquid.style.backgroundColor = getIndicatorColor(pH);
+
+    // 5. Update Burette Visual
+    // Initial 50mL burette, decreasing
+    const buretteCapacity = 50;
+    let buretteHeight = ((buretteCapacity - state.volBaseAdded) / buretteCapacity) * 100;
+    if (buretteHeight < 0) buretteHeight = 0;
+    buretteLiquid.style.height = `${buretteHeight}%`;
 }
 
 function resetTitration() {
@@ -261,6 +278,7 @@ btnAdd01.addEventListener('click', () => addTitrant(0.1));
 btnAdd1.addEventListener('click', () => addTitrant(1.0));
 btnReset.addEventListener('click', resetTitration);
 btnAuto.addEventListener('click', toggleAutoTitrate);
+stopcockBtn.addEventListener('click', () => addTitrant(0.1));
 
 // Init
 resetTitration();

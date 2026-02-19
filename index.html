@@ -19,9 +19,14 @@
             <section class="visualization-panel">
                 <div class="burette-container">
                     <div class="burette">
-                        <div class="liquid-base"></div>
-                        <div class="stopcock"></div>
+                        <div class="liquid-base" id="burette-liquid"></div>
+                        <div class="stopcock-container">
+                            <button id="btn-stopcock" class="stopcock-btn" title="Adicionar gota"></button>
+                        </div>
                         <div class="tip"></div>
+                        <div class="drop-container" id="drop-container">
+                            <div class="drop" id="liquid-drop"></div>
+                        </div>
                     </div>
                 </div>
                 <div class="beaker-container">
