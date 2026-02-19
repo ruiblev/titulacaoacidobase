@@ -21,7 +21,6 @@ const valBaseConc = document.getElementById('val-base-conc');
 // Buttons
 const btnAdd01 = document.getElementById('btn-add-01');
 const btnAdd1 = document.getElementById('btn-add-1');
-const btnAuto = document.getElementById('btn-auto');
 const btnReset = document.getElementById('btn-reset');
 
 // State
@@ -31,9 +30,7 @@ let state = {
     acidConc: 0.1, // M
     baseConc: 0.1, // M
     volBaseAdded: 0, // mL
-    isAutoTitrating: false,
     isStopcockOpen: false,
-    intervalId: null,
     dropIntervalId: null
 };
 
@@ -229,9 +226,10 @@ function updateSimulation() {
 }
 
 function resetTitration() {
-    clearInterval(state.intervalId);
-    state.isAutoTitrating = false;
-    btnAuto.textContent = "Titular Auto";
+    state.isStopcockOpen = false;
+    stopcockBtn.classList.remove('open');
+    clearInterval(state.dropIntervalId);
+    drop.classList.remove('animate-drop');
 
     // Read current inputs
     state.acidType = acidTypeSelect.value;
@@ -255,29 +253,7 @@ function resetTitration() {
     updateSimulation();
 }
 
-function toggleAutoTitrate() {
-    if (state.isStopcockOpen) toggleStopcock(); // Close manual if open
-
-    if (state.isAutoTitrating) {
-        clearInterval(state.intervalId);
-        state.isAutoTitrating = false;
-        btnAuto.textContent = "Titular Auto";
-    } else {
-        state.isAutoTitrating = true;
-        btnAuto.textContent = "Parar";
-        state.intervalId = setInterval(() => {
-            if (state.volBaseAdded >= titrationChart.options.scales.x.max) {
-                toggleAutoTitrate(); // Stop
-                return;
-            }
-            addTitrant(0.5); // 0.5 mL steps
-        }, 100);
-    }
-}
-
 function toggleStopcock() {
-    if (state.isAutoTitrating) toggleAutoTitrate(); // Stop auto if active
-
     if (state.isStopcockOpen) {
         // Close
         state.isStopcockOpen = false;
@@ -305,7 +281,6 @@ btnReset.addEventListener('click', () => {
     if (state.isStopcockOpen) toggleStopcock();
     resetTitration();
 });
-btnAuto.addEventListener('click', toggleAutoTitrate);
 stopcockBtn.addEventListener('click', toggleStopcock);
 
 // Init
