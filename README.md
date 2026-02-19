@@ -14,7 +14,7 @@ Um simulador interativo de titulação ácido-base construído com HTML, CSS e J
 - **Controlos Personalizáveis**:
   - Seleção do tipo de ácido.
   - Ajuste de volume e concentração.
-  - Adição manual,
+  - Adição manual.
 
 ## Como Executar
 
