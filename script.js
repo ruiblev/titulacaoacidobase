@@ -4,7 +4,7 @@ const ctx = canvas.getContext('2d');
 const beakerLiquid = document.getElementById('beaker-liquid');
 const buretteLiquid = document.getElementById('burette-liquid');
 const stopcockBtn = document.getElementById('btn-stopcock');
-const drop = document.getElementById('liquid-drop');
+const dropContainer = document.getElementById('drop-container');
 const indicatorName = document.getElementById('indicator-name');
 const currentPhDisplay = document.getElementById('current-ph');
 const volAddedDisplay = document.getElementById('vol-added');
@@ -187,9 +187,14 @@ function addTitrant(amount) {
 }
 
 function triggerDrop() {
-    drop.classList.remove('animate-drop');
-    void drop.offsetWidth; // Trigger reflow
-    drop.classList.add('animate-drop');
+    const drop = document.createElement('div');
+    drop.classList.add('drop', 'animate-drop');
+    dropContainer.appendChild(drop);
+
+    // Remove drop after animation
+    setTimeout(() => {
+        drop.remove();
+    }, 400); // Match animation duration
 }
 
 function updateSimulation() {
@@ -229,7 +234,7 @@ function resetTitration() {
     state.isStopcockOpen = false;
     stopcockBtn.classList.remove('open');
     clearInterval(state.dropIntervalId);
-    drop.classList.remove('animate-drop');
+    dropContainer.innerHTML = ''; // Clear drops
 
     // Read current inputs
     state.acidType = acidTypeSelect.value;
@@ -259,7 +264,7 @@ function toggleStopcock() {
         state.isStopcockOpen = false;
         stopcockBtn.classList.remove('open');
         clearInterval(state.dropIntervalId);
-        drop.classList.remove('animate-drop');
+        // Let existing drops finish falling
     } else {
         // Open
         state.isStopcockOpen = true;
