@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Bureta Component</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap');
+    
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: 'Inter', sans-serif;
+      text-align: center;
+      background: transparent;
+      color: #e0f0ff;
+      user-select: none;
+      -webkit-user-select: none;
+    }
+    .container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 10px;
+    }
+    svg {
+      display: block;
+      margin: 0 auto;
+      overflow: visible;
+    }
+    .bureta-btn {
+      margin-top: 20px;
+      padding: 14px 28px;
+      font-size: 16px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #3a7bd5 0%, #295ab0 100%);
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+      transition: all 0.1s;
+      outline: none;
+    }
+    .bureta-btn:active {
+      transform: translateY(2px);
+      box-shadow: 0 1px 2px rgba(0,0,0,0.3);
+    }
+    /* SVG elements styling */
+    .glass {
+      stroke: #aabcd0;
+      stroke-width: 3;
+      fill: rgba(255, 255, 255, 0.05);
+    }
+    .liquid-bureta {
+      fill: rgba(140, 180, 255, 0.2);
+      transition: y 0.2s linear, height 0.2s linear;
+    }
+    .liquid-gobele {
+      transition: fill 0.5s ease;
+    }
+    .scale-line {
+      stroke: #778899;
+      stroke-width: 1.5;
+    }
+    .scale-text {
+      fill: #aab;
+      font-size: 12px;
+      font-family: monospace;
+    }
+    .tap {
+      fill: #ced4da;
+      transform-origin: 100px 345px;
+      transition: transform 0.15s ease;
+    }
+    .tap.open {
+      transform: rotate(-90deg);
+      fill: #ffdd57;
+    }
+    .drop {
+      fill: rgba(140, 180, 255, 0.5);
+      opacity: 0;
+    }
+    @keyframes falling {
+      0% { transform: translateY(0); opacity: 1; }
+      80% { opacity: 1; }
+      100% { transform: translateY(100px); opacity: 0; }
+    }
+    .drop.animating {
+      animation: falling 0.3s infinite linear;
+    }
+    .instruction {
+      font-size: 13px;
+      color: #8899aa;
+      margin-top: 8px;
+    }
+
+    /* ── Magnetic stirrer ── */
+    @keyframes spin-stirrer {
+      0%   { transform: scaleX(1); }
+      50%  { transform: scaleX(-1); }
+      100% { transform: scaleX(1); }
+    }
+    #stirrer {
+      transform-origin: 100px 530px; /* centre of stirrer */
+      animation: spin-stirrer 0.6s infinite linear;
+    }
+
+    /* ── Phenolphthalein dynamic plume ── */
+    @keyframes plume-anim {
+      0%   { opacity: 0; transform: scaleY(0.2) scaleX(0.2) translateY(-20px); }
+      15%  { opacity: 0.35; transform: scaleY(1.0) scaleX(0.6) translateY(0px); }
+      50%  { opacity: 0.15; transform: scaleY(1.0) scaleX(1.4) translateY(2px); }
+      100% { opacity: 0; transform: scaleY(1.0) scaleX(2.5) translateY(5px); }
+    }
+    .dynamic-plume {
+      transform-origin: 100px 460px;
+      animation: plume-anim 1.8s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+      pointer-events: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container" id="app">
+    <div style="font-size:18px; font-weight: 600; margin-bottom: 20px;">🧪 Bureta Interativa</div>
+    <svg width="200" height="580" viewBox="0 0 200 580">
+      
+      <!-- Burette Liquid Base -->
+      <rect id="bureta-liq" class="liquid-bureta" x="82" y="30" width="36" height="300" />
+      
+      <!-- Burette Glass Tube -->
+      <path class="glass" d="M 80 10 L 80 330 L 95 340 L 95 350 L 105 350 L 105 340 L 120 330 L 120 10" fill="none" />
+      
+      <!-- Tap Base -->
+      <rect x="90" y="340" width="20" height="15" fill="#555" />
+      
+      <!-- Rotating Tap Lever -->
+      <g id="tap-lever" class="tap">
+        <rect x="75" y="341" width="50" height="8" rx="4" />
+        <circle cx="100" cy="345" r="6" fill="#333" />
+      </g>
+      
+      <!-- Nozzle -->
+      <path d="M 98 355 L 98 365 L 102 365 L 102 355 Z" fill="#777" />
+      
+      <!-- Animated Drop -->
+      <circle id="drop" class="drop" cx="100" cy="370" r="4" />
+
+      <!-- Scale markings -->
+      <g id="scale">
+        <line class="scale-line" x1="80" y1="30" x2="95" y2="30"/> <text class="scale-text" x="55" y="34">0</text>
+        <line class="scale-line" x1="80" y1="90" x2="95" y2="90"/> <text class="scale-text" x="55" y="94">10</text>
+        <line class="scale-line" x1="80" y1="150" x2="95" y2="150"/> <text class="scale-text" x="55" y="154">20</text>
+        <line class="scale-line" x1="80" y1="210" x2="95" y2="210"/> <text class="scale-text" x="55" y="214">30</text>
+        <line class="scale-line" x1="80" y1="270" x2="95" y2="270"/> <text class="scale-text" x="55" y="274">40</text>
+        <line class="scale-line" x1="80" y1="330" x2="95" y2="330"/> <text class="scale-text" x="55" y="334">50</text>
+      </g>
+      <g id="small-ticks"></g>
+
+      <!-- ═══ Beaker (Gobelé) ═══ -->
+      <path class="glass" d="M 40 380 L 40 520 Q 40 535 55 535 L 145 535 Q 160 535 160 520 L 160 380" fill="none"/>
+      
+      <!-- Beaker Liquid -->
+      <path id="gobele-liq" class="liquid-gobele" fill="#eef4fa"
+            d="M 43 460 L 43 517 Q 43 530 55 530 L 145 530 Q 157 530 157 517 L 157 460 Z" />
+
+      <!-- ── Pink plume flash (phenolphthalein near EP) ── -->
+      <defs>
+        <clipPath id="liquid-clip">
+          <path d="M 43 460 L 43 517 Q 43 530 55 530 L 145 530 Q 157 530 157 517 L 157 460 Z" />
+        </clipPath>
+        <filter id="blur-plume" x="-50%" y="-50%" width="200%" height="200%">
+          <feGaussianBlur in="SourceGraphic" stdDeviation="5" />
+        </filter>
+        <radialGradient id="plume-grad" cx="50%" cy="50%" r="50%">
+          <stop offset="0%" stop-color="#e8336d" stop-opacity="0.8" />
+          <stop offset="50%" stop-color="#e8336d" stop-opacity="0.4" />
+          <stop offset="100%" stop-color="#e8336d" stop-opacity="0" />
+        </radialGradient>
+        
+        <!-- Template for dynamic plumes -->
+        <g id="plume-template">
+          <ellipse cx="100" cy="485" rx="5" ry="25" fill="url(#plume-grad)" filter="url(#blur-plume)" />
+          <ellipse cx="100" cy="515" rx="20" ry="10" fill="url(#plume-grad)" filter="url(#blur-plume)" />
+          <circle cx="100" cy="500" r="12" fill="url(#plume-grad)" filter="url(#blur-plume)" />
+        </g>
+      </defs>
+
+      <!-- Container for dynamic plumes, strictly clipped to the liquid volume -->
+      <g clip-path="url(#liquid-clip)" id="plume-container"></g>
+
+      <!-- ── Magnetic Stirrer bar ── -->
+      <!-- The stirrer sits at the bottom of the beaker and rotates horizontally -->
+      <g id="stirrer">
+        <rect x="80" y="526" width="40" height="8" rx="4"
+              fill="#f0f0f5" stroke="#9999bb" stroke-width="1.5"
+              opacity="0.95"/>
+        <!-- coloured stripe -->
+        <rect x="96" y="526" width="8" height="8" rx="1.5" fill="#cc4488" opacity="0.9"/>
+      </g>
+
+      <!-- ── Hot Plate (Placa de Agitação) ── -->
+      <g id="hot-plate">
+        <!-- Top surface -->
+        <path d="M 25 536 L 175 536 L 185 548 L 15 548 Z" fill="#e8e8e8" stroke="#888" stroke-width="1.5" />
+        <!-- Body -->
+        <rect x="15" y="548" width="170" height="16" fill="#cfcfcf" stroke="#888" stroke-width="1.5" />
+        <!-- Knobs and dials -->
+        <circle cx="50" cy="556" r="5" fill="#555" />
+        <circle cx="150" cy="556" r="5" fill="#555" />
+        <rect x="85" y="552" width="30" height="8" fill="#333" rx="2" />
+      </g>
+
+      <!-- Beaker scale lines (on top of liquid) -->
+      <line class="scale-line" x1="40" y1="430" x2="55" y2="430"/> <text class="scale-text" x="15" y="434">100</text>
+      <line class="scale-line" x1="40" y1="475" x2="55" y2="475"/> <text class="scale-text" x="22" y="479">50</text>
+
+      <!-- Beaker glass outline (front, drawn last so it's on top) -->
+      <path d="M 40 380 L 40 520 Q 40 535 55 535 L 145 535 Q 160 535 160 520 L 160 380"
+            fill="none" stroke="#aabcd0" stroke-width="3"/>
+    </svg>
+
+    <button class="bureta-btn" id="ctrl-btn">Controlar Torneira</button>
+    <div class="instruction">
+      👆 Clique rápido = 1 Gota (+0.1 mL)<br>
+      👇 Manter premido = Fluxo Contínuo
+    </div>
+  </div>
+
+  <script>
+    // Local Streamlit Component API Polyfill
+    function sendMessageToStreamlitClient(type, data) {
+        var outData = Object.assign({
+            isStreamlitMessage: true,
+            type: type,
+        }, data);
+        window.parent.postMessage(outData, "*");
+    }
+
+    const Streamlit = {
+        setComponentReady: function() {
+            sendMessageToStreamlitClient("streamlit:componentReady", {apiVersion: 1});
+        },
+        setFrameHeight: function(height) {
+            sendMessageToStreamlitClient("streamlit:setFrameHeight", {height: height});
+        },
+        setComponentValue: function(value) {
+            sendMessageToStreamlitClient("streamlit:setComponentValue", {value: value, dataType: "json"});
+        },
+        RENDER_EVENT: "streamlit:render",
+        events: {
+            addEventListener: function(type, callback) {
+                window.addEventListener("message", function(event) {
+                    if (event.data.type === type) {
+                        event.detail = event.data;
+                        callback(event);
+                    }
+                });
+            }
+        }
+    };
+
+    // UI Logic
+    const LIQ_BURETA   = document.getElementById("bureta-liq");
+    const TAP_LEVER    = document.getElementById("tap-lever");
+    const DROP         = document.getElementById("drop");
+    const LIQ_GOBELE   = document.getElementById("gobele-liq");
+    const CTRL_BTN     = document.getElementById("ctrl-btn");
+    
+    // Ticks
+    const smallTicksGrp = document.getElementById("small-ticks");
+    for(let i=0; i<=50; i++) {
+        if (i % 10 !== 0) {
+            let isFive = (i % 5 === 0);
+            let y = 30 + i * 6;
+            let len = isFive ? 10 : 5;
+            let line = document.createElementNS("http://www.w3.org/2000/svg", "line");
+            line.setAttribute("class", "scale-line");
+            line.setAttribute("x1", "80");
+            line.setAttribute("y1", y);
+            line.setAttribute("x2", 80 + len);
+            line.setAttribute("y2", y);
+            smallTicksGrp.appendChild(line);
+        }
+    }
+
+    let volume   = 0.0;
+    let currentColor = "#eef4fa";
+    // Track pH passed from Streamlit (via cor_hex heuristic or explicit arg)
+    // We receive cor_hex from Python; we detect proximity to EP by checking
+    // if the colour is very close to the acid colour (light blue/white)
+    // AND a drop is being added. We also receive ph_atual via a separate arg.
+    let currentPh = 0.0;
+
+    // ── Phenolphthalein flash logic ─────────────────────────────────────────
+    // The flash triggers when:
+    //   • The indicator is Fenolftaleína (cor_hex is in the "acid/incolor" range)
+    //   • pH is between ~3.0 and ~8.2 (before the real viragem) but specifically
+    //     near the EP region passed by Python as `near_ep` flag
+    let nearEP   = false;   // set by Streamlit args
+
+    function triggerPinkFlash() {
+        const container = document.getElementById("plume-container");
+        const plume = document.createElementNS("http://www.w3.org/2000/svg", "g");
+        plume.setAttribute("class", "dynamic-plume");
+        plume.innerHTML = '<use href="#plume-template" />';
+        
+        container.appendChild(plume);
+        
+        // Remove element after animation completes
+        setTimeout(() => {
+            if (plume.parentNode) plume.parentNode.removeChild(plume);
+        }, 1800);
+    }
+
+    function updateVisuals(vol, color) {
+        if (vol > 50.0) vol = 50.0;
+        let liqY = 30 + vol * 6;
+        let liqH = 300 - vol * 6;
+        LIQ_BURETA.setAttribute("y", liqY);
+        LIQ_BURETA.setAttribute("height", Math.max(0, liqH));
+        if (color) {
+            currentColor = color;
+            LIQ_GOBELE.setAttribute("fill", color);
+        }
+    }
+
+    function sendValueToStreamlit() {
+        Streamlit.setComponentValue(Number(volume.toFixed(2)));
+    }
+
+    function onRender(event) {
+        if (event.detail.args && event.detail.args.vol_add !== undefined) {
+            volume   = event.detail.args.vol_add;
+            nearEP   = event.detail.args.near_ep   || false;
+            updateVisuals(volume, event.detail.args.cor_hex);
+        }
+        
+        let targetHeight = document.getElementById("app").scrollHeight + 30;
+        Streamlit.setFrameHeight(Math.max(720, targetHeight));
+    }
+
+    Streamlit.events.addEventListener(Streamlit.RENDER_EVENT, onRender);
+    Streamlit.setComponentReady();
+    Streamlit.setFrameHeight(720);
+
+    // --- Interaction ---
+    let isPressed    = false;
+    let pressTimer   = null;
+    let flowInterval = null;
+    let justClicked  = true;
+
+    function openTapVisually() {
+        TAP_LEVER.classList.add("open");
+        DROP.classList.add("animating");
+    }
+
+    function closeTapVisually() {
+        TAP_LEVER.classList.remove("open");
+        DROP.classList.remove("animating");
+    }
+
+    function doDrop() {
+        if (volume < 50.0) {
+            volume += 0.10;
+            if (volume > 50.0) volume = 50.0;
+            updateVisuals(volume, null);
+            sendValueToStreamlit();
+
+            // Trigger pink flash if we are near the equivalence point
+            if (nearEP) {
+                triggerPinkFlash();
+            }
+        }
+    }
+
+    function startPress(e) {
+        if (e.button !== 0 && e.type === "mousedown") return;
+        if (volume >= 50.0) return;
+        isPressed   = true;
+        justClicked = true; 
+        
+        openTapVisually();
+
+        pressTimer = setTimeout(() => {
+            justClicked = false;
+            flowInterval = setInterval(() => {
+                if (volume < 50.0) {
+                    volume += 0.10;
+                    if (volume > 50.0) volume = 50.0;
+                    updateVisuals(volume, null);
+                    sendValueToStreamlit();
+
+                    // Flash on every drop during continuous flow near EP
+                    if (nearEP) {
+                        triggerPinkFlash();
+                    }
+                } else {
+                    stopPress(); 
+                }
+            }, 100);
+        }, 150); 
+    }
+
+    function stopPress() {
+        if (!isPressed) return;
+        isPressed = false;
+
+        closeTapVisually();
+        if (pressTimer)   clearTimeout(pressTimer);
+        if (flowInterval) clearInterval(flowInterval);
+
+        if (justClicked) {
+            doDrop();
+        } else {
+            sendValueToStreamlit(); 
+        }
+    }
+
+    CTRL_BTN.addEventListener("mousedown", startPress);
+    window.addEventListener("mouseup", stopPress); 
+    
+    CTRL_BTN.addEventListener("touchstart", (e) => { e.preventDefault(); startPress(e); });
+    window.addEventListener("touchend", stopPress);
+  </script>
+</body>
+</html>
